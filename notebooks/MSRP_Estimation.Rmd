@@ -1,0 +1,58 @@
+---
+title: "Case Based Reasoning System for MSRP estimation"
+output:
+    html_document:
+    df_print: paged
+theme: sandstone
+---
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(here)
+
+theme_set(theme_bw())
+```
+
+## Loading Data
+
+```{r}
+read_csv(here("data/data.csv"),
+         progress = FALSE, 
+         col_types =
+           cols(
+            Make = col_character(),
+            Model = col_character(),
+            Year = col_integer(),
+            `Engine Fuel Type` = col_character(),
+            `Engine HP` = col_integer(),
+            `Engine Cylinders` = col_integer(),
+            `Transmission Type` = col_character(),
+            Driven_Wheels = col_character(),
+            `Number of Doors` = col_integer(),
+            `Market Category` = col_character(),
+            `Vehicle Size` = col_character(),
+            `Vehicle Style` = col_character(),
+            `highway MPG` = col_integer(),
+            `city mpg` = col_integer(),
+            Popularity = col_integer(),
+            MSRP = col_integer()
+            )) -> car_data 
+
+car_data %>% 
+    glimpse()
+```
+
+## Split data into training/testing sets 
+
+```{r}
+## Adding surrogate key to dataframe
+car_data$id <- 1:nrow(car_data)
+
+car_data %>% 
+  dplyr::sample_frac(.8) -> train
+
+dplyr::anti_join(car_data, 
+                 train, 
+                 by = 'id') -> test
+```
+
