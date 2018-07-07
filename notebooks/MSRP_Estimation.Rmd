@@ -9,6 +9,8 @@ theme: sandstone
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 library(tidyverse)
 library(here)
+library(FNN)
+library(class)
 
 theme_set(theme_bw())
 ```
@@ -36,15 +38,42 @@ read_csv(here("data/data.csv"),
             `city mpg` = col_integer(),
             Popularity = col_integer(),
             MSRP = col_integer()
-            )) -> car_data 
+            )) %>% 
+  drop_na() -> car_data 
+
+# Normalize the numeric variables  
+
+num.vars <- sapply(car_data,
+                   is.numeric)
+car_data[num.vars] <- lapply(car_data[num.vars],
+                             scale)
+
+car_data <- car_data[num.vars]
 
 car_data %>% 
     glimpse()
 ```
 
+```{r}
+# dummified <- fastDummies::dummy_columns(car_data)
+```
+
+
+### Checking for missing values
+
+```{r}
+row.has.na <- apply(car_data, 
+                    1,
+                    function(x){any(is.na(x))})
+noquote(paste('Number of rows with misssing values: ',
+            sum(row.has.na)))
+```
+
+
 ## Split data into training/testing sets 
 
 ```{r}
+set.seed(101)
 ## Adding surrogate key to dataframe
 car_data$id <- 1:nrow(car_data)
 
@@ -54,5 +83,26 @@ car_data %>%
 dplyr::anti_join(car_data, 
                  train, 
                  by = 'id') -> test
+```
+
+### Using class::knn
+
+```{r}
+# train.def <- gc$Default[-test]
+# test.def <- gc$Default[test]
+
+
+knn.1 <-  class::knn(train, test[1:1,], train$id, k=1)
+knn.10 <-  class::knn(train, test[1:1,], train$id, k=10)
+
+knn.10
+```
+
+### Using FNN::knn
+
+```{r}
+k <- FNN::knn(train, test, train$id, k = 10, algorithm="cover_tree")
+indices <- attr(k, "nn.index")
+print(indices[20, ])
 ```
 
