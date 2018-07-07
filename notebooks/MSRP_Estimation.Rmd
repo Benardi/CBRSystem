@@ -41,23 +41,9 @@ read_csv(here("data/data.csv"),
             )) %>% 
   drop_na() -> car_data 
 
-# Normalize the numeric variables  
-
-num.vars <- sapply(car_data,
-                   is.numeric)
-car_data[num.vars] <- lapply(car_data[num.vars],
-                             scale)
-
-car_data <- car_data[num.vars]
-
 car_data %>% 
     glimpse()
 ```
-
-```{r}
-# dummified <- fastDummies::dummy_columns(car_data)
-```
-
 
 ### Checking for missing values
 
@@ -69,11 +55,36 @@ noquote(paste('Number of rows with misssing values: ',
             sum(row.has.na)))
 ```
 
+## Remove Categorical variables
+
+```{r}
+# dummified <- fastDummies::dummy_columns(car_data)
+```
+
+```{r}
+## Removing categorical variables for now
+
+num.vars <- sapply(car_data,
+                   is.numeric, 
+                   simplify=F)
+
+car_data <- car_data[unlist(num.vars)]
+
+
+## Applying scale to numeric variables except MSRP
+
+num.vars$MSRP = FALSE
+num.vars <- unlist(num.vars)
+
+car_data[num.vars] <- lapply(car_data[num.vars],
+                             scale)
+```
 
 ## Split data into training/testing sets 
 
 ```{r}
 set.seed(101)
+
 ## Adding surrogate key to dataframe
 car_data$id <- 1:nrow(car_data)
 
@@ -85,24 +96,51 @@ dplyr::anti_join(car_data,
                  by = 'id') -> test
 ```
 
-### Using class::knn
+## Dissociating predictor from response variable
 
 ```{r}
-# train.def <- gc$Default[-test]
-# test.def <- gc$Default[test]
+train %>% 
+  select(-MSRP) -> train.predictors
 
+train %>% 
+  select(MSRP, id) -> train.response
 
-knn.1 <-  class::knn(train, test[1:1,], train$id, k=1)
-knn.10 <-  class::knn(train, test[1:1,], train$id, k=10)
+test %>% 
+  select(-MSRP) -> test.predictors
 
-knn.10
+test %>% 
+  select(MSRP, id) -> test.response
 ```
 
-### Using FNN::knn
+## Dissociating surrogate key from predictors
 
 ```{r}
-k <- FNN::knn(train, test, train$id, k = 10, algorithm="cover_tree")
+train.predictors %>% 
+  select(-id) -> train.predictors 
+
+test.predictors %>% 
+  select(-id) -> test.predictors 
+```
+
+```{r}
+test.predictors
+```
+
+
+### Choosing K Nearest Neighbor  for K = 10
+
+```{r}
+k <- FNN::knn(train.predictors, test.predictors, train$id, k = 10, algorithm="cover_tree")
 indices <- attr(k, "nn.index")
-print(indices[20, ])
+
+print(indices[20,])
 ```
 
+```{r}
+for(el in indices[20,]){
+  train.response %>% 
+    filter(id == el) %>%
+    print(id, MSRP)
+}
+
+```
