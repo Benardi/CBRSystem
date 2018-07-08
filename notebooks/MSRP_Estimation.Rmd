@@ -3,10 +3,23 @@ title: "Case Based Reasoning System for MSRP estimation"
 author: "José Benardi de Souza Nunes"
 date: 07/07/2018
 output:
-    html_document:
+  html_notebook:
+    toc: yes
+    toc_float: yes
+  html_document:
     df_print: paged
-theme: sandstone
+    toc: yes
+    toc_float: yes
 ---
+
+<br>
+
+# Introduction
+
+<br>
+
+> Employed data, scripts and a brief description can be found at the [original repository](https://github.com/Benardi/CBRSystem). Further references can be found at
+the page of [Prof. Ian Watson](https://www.cs.auckland.ac.nz/~ian/CBR/).
 
 ```{r message=FALSE, warning=FALSE}
 library(FNN)
@@ -19,7 +32,17 @@ source(here::here("code/calc_KNN_error.R"))
 theme_set(theme_bw())
 ```
 
-## Loading Data
+<br>
+
+***
+
+<br>
+
+# Data Overview
+
+<br>
+
+#### Loading Data
 
 ```{r}
 read_csv(here::here("data/data.csv"),
@@ -67,8 +90,9 @@ car_data %>%
     glimpse()
 ```
 
+<br>
 
-### Checking for missing values
+## Checking for missing values
 
 ```{r}
 row.has.na <- apply(car_data, 
@@ -77,6 +101,8 @@ row.has.na <- apply(car_data,
 noquote(paste('Number of rows with misssing values: ',
             sum(row.has.na)))
 ```
+
+<br>
 
 ## Applying scale to predictor variables
 
@@ -91,7 +117,17 @@ num.vars <- unlist(num.vars)
 
 car_data[num.vars] <- lapply(car_data[num.vars],
                              scale)
+car_data %>% 
+  sample_n(10)
 ```
+
+***
+
+<br>
+
+# Validation
+
+<br>
 
 ## Split data into training/testing sets 
 
@@ -109,7 +145,7 @@ dplyr::anti_join(car_data,
                  by = 'id') -> test
 ```
 
-## Dissociating predictor from response variable and surrogate key
+## Dissociate predictors from response variable/surrogate key
 
 ```{r}
 train %>% 
@@ -125,7 +161,15 @@ test %>%
   select(MSRP, id) -> test.response
 ```
 
-### Calculating accumulated error for K Nearest Neighbor at given K
+***
+
+<br>
+
+# Apply K Nearest Neighbor
+
+<br>
+
+## Calculate accumulated error
 
 ```{r}
 results <- data.frame(matrix(ncol = 0, nrow = 10))
@@ -160,4 +204,14 @@ results %>%
   labs(y="Accumulated Error", x= "K Value") +
   ggtitle("Accumulated Error by K value")
 ```
+
+<br>
+
+## Results
+
+<br>
+
+* A smaller K seems to render less accumulated error.
+* At K = 2, we have an unusual spike in terms of accumulated error, which one could impute on a probable overfit. 
+* **K = 1** renders the smallest amount of Accumulated Error.
 
