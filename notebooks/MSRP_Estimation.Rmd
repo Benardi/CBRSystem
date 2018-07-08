@@ -1,5 +1,7 @@
 ---
 title: "Case Based Reasoning System for MSRP estimation"
+author: "José Benardi de Souza Nunes"
+date: 07/07/2018
 output:
     html_document:
     df_print: paged
@@ -45,6 +47,25 @@ car_data %>%
     glimpse()
 ```
 
+## Dummify Categorical Variables 
+
+```{r}
+car_data %>%
+  mutate(
+    Make = as.numeric(factor(Make)),
+    Model = as.numeric(factor(Model)),
+    `Engine Fuel Type` = as.numeric(factor(`Engine Fuel Type`)),
+    `Transmission Type` = as.numeric(factor(`Transmission Type`)),
+    Driven_Wheels = as.numeric(factor(Driven_Wheels)),
+    `Market Category` = as.numeric(factor(`Market Category`)),
+    `Vehicle Size` = as.numeric(factor(`Vehicle Size`)),
+    `Vehicle Style` = as.numeric(factor(`Vehicle Style`)))-> car_data 
+
+car_data %>% 
+    glimpse()
+```
+
+
 ### Checking for missing values
 
 ```{r}
@@ -55,22 +76,9 @@ noquote(paste('Number of rows with misssing values: ',
             sum(row.has.na)))
 ```
 
-## Remove Categorical variables
+## Applying scale to predictor variables
 
 ```{r}
-# dummified <- fastDummies::dummy_columns(car_data)
-```
-
-```{r}
-## Removing categorical variables for now
-
-num.vars <- sapply(car_data,
-                   is.numeric)
-
-car_data <- car_data[num.vars]
-
-
-## Applying scale to numeric variables except MSRP
 
 num.vars <- sapply(car_data,
                    is.numeric, 
@@ -98,13 +106,6 @@ dplyr::anti_join(car_data,
                  train, 
                  by = 'id') -> test
 ```
-
-```{r}
-dplyr::semi_join(test, 
-                 train, 
-                 by = 'id') 
-```
-
 
 ## Dissociating predictor from response variable and surrogate key
 
@@ -192,8 +193,7 @@ results %>%
              alpha = .6) + 
   geom_line() +
   scale_x_continuous(breaks=seq(1,10,1)) +
-  labs(y="Erro Acumulado", x= "Valor de K") +
-  ggtitle("Erro acumulado em função de K")
+  labs(y="Accumulated Error", x= "K Value") +
+  ggtitle("Accumulated Error by K value")
 ```
-
 
