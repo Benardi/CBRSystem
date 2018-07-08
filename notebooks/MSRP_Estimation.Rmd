@@ -8,11 +8,13 @@ output:
 theme: sandstone
 ---
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
-library(tidyverse)
-library(here)
+```{r message=FALSE, warning=FALSE}
 library(FNN)
+library(here)
 library(magrittr)
+library(tidyverse)
+
+source(here::here("code/calc_KNN_error.R"))
 
 theme_set(theme_bw())
 ```
@@ -20,7 +22,7 @@ theme_set(theme_bw())
 ## Loading Data
 
 ```{r}
-read_csv(here("data/data.csv"),
+read_csv(here::here("data/data.csv"),
          progress = FALSE, 
          col_types =
            cols(
@@ -123,45 +125,7 @@ test %>%
   select(MSRP, id) -> test.response
 ```
 
-
 ### Calculating accumulated error for K Nearest Neighbor at given K
-
-```{r}
-require(FNN)
-
-calc_KNN_error <- function(k_val,
-                           train_pred,
-                           test_pred,
-                           label,
-                           train_resp,
-                           test_res) {
-  
-  k <- FNN::knn(train_pred,
-              test_pred, 
-              label,
-              k = k_val,
-              algorithm="cover_tree")
-
-  indices <- attr(k, "nn.index")
-  
-  estimates <- c()
-  
-  for(i in seq(1,nrow(indices),1)) {
-    lapply(indices[i,],
-         function(x){train_resp[x,]$MSRP}) %>% 
-    Reduce("+", .) %>% 
-    divide_by(length(indices[i,])) -> result
-    estimates <-c(estimates, result)
-  }
-  
-  accum_error <- 0
-  
-  for(j in seq(1,length(estimates),1)) {
-    accum_error <- accum_error + ((estimates[j] - test_res$MSRP[j]) ^ 2 )
-  }
-  return(accum_error)
-}
-```
 
 ```{r}
 results <- data.frame(matrix(ncol = 0, nrow = 10))

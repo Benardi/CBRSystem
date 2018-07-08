@@ -126,9 +126,17 @@ $(document).ready(function () {
 </div>
 
 
+<pre class="r"><code>library(FNN)
+library(here)
+library(magrittr)
+library(tidyverse)
+
+source(here::here(&quot;code/calc_KNN_error.R&quot;))
+
+theme_set(theme_bw())</code></pre>
 <div id="loading-data" class="section level2">
 <h2>Loading Data</h2>
-<pre class="r"><code>read_csv(here(&quot;data/data.csv&quot;),
+<pre class="r"><code>read_csv(here::here(&quot;data/data.csv&quot;),
          progress = FALSE, 
          col_types =
            cols(
@@ -256,40 +264,6 @@ test %&gt;%
   select(MSRP, id) -&gt; test.response</code></pre>
 <div id="calculating-accumulated-error-for-k-nearest-neighbor-at-given-k" class="section level3">
 <h3>Calculating accumulated error for K Nearest Neighbor at given K</h3>
-<pre class="r"><code>require(FNN)
-
-calc_KNN_error &lt;- function(k_val,
-                           train_pred,
-                           test_pred,
-                           label,
-                           train_resp,
-                           test_res) {
-  
-  k &lt;- FNN::knn(train_pred,
-              test_pred, 
-              label,
-              k = k_val,
-              algorithm=&quot;cover_tree&quot;)
-
-  indices &lt;- attr(k, &quot;nn.index&quot;)
-  
-  estimates &lt;- c()
-  
-  for(i in seq(1,nrow(indices),1)) {
-    lapply(indices[i,],
-         function(x){train_resp[x,]$MSRP}) %&gt;% 
-    Reduce(&quot;+&quot;, .) %&gt;% 
-    divide_by(length(indices[i,])) -&gt; result
-    estimates &lt;-c(estimates, result)
-  }
-  
-  accum_error &lt;- 0
-  
-  for(j in seq(1,length(estimates),1)) {
-    accum_error &lt;- accum_error + ((estimates[j] - test_res$MSRP[j]) ^ 2 )
-  }
-  return(accum_error)
-}</code></pre>
 <pre class="r"><code>results &lt;- data.frame(matrix(ncol = 0, nrow = 10))
 results$k &lt;- seq(1,10,1)
 
