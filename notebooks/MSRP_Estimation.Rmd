@@ -127,39 +127,45 @@ test %>%
 ### Choosing K Nearest Neighbor  for K = 10
 
 ```{r}
-k <- FNN::knn(train.predictors,
+require(FNN)
+
+calc_KNN_error <- function(k_val = n, 
+                           indices = indices, 
+                           train = train.response,
+                           test = test) {
+  
+  k <- FNN::knn(train.predictors,
               test.predictors, 
               train.response$id,
-              k = 1,
+              k = k_val,
               algorithm="cover_tree")
 
-indices <- attr(k, "nn.index")
-```
-
-```{r}
-print(indices[2,])
-test[20:20,]$MSRP
-```
-
-```{r}
-
-expected <- data.frame(matrix(ncol = 0, nrow = nrow(indices)))
-estimates <- c()
-
-for(i in seq(1,nrow(indices),1)) {
-  lapply(indices[i,],
-       function(x){train.response[x,]$MSRP}) %>% 
-  Reduce("+", .) %>% 
-  divide_by(length(indices[i,])) -> result
-  estimates <-c(estimates, result)
+  indices <- attr(k, "nn.index")
+  
+  estimates <- c()
+  
+  for(i in seq(1,nrow(indices),1)) {
+    lapply(indices[i,],
+         function(x){train.response[x,]$MSRP}) %>% 
+    Reduce("+", .) %>% 
+    divide_by(length(indices[i,])) -> result
+    estimates <-c(estimates, result)
+  }
+  
+  accum_error <- 0
+  
+  for(j in seq(1,length(estimates),1)) {
+    accum_error <- accum_error + ((estimates[j] - test$MSRP[j]) ^ 2 )
+  }
+  return(accum_error)
 }
-expected$estimate <- estimates
-expected$actual <- test$MSRP
-Reduce(function (x, y) x+y, x)
+```
 
-expected %>%
-  mutate(error = (estimate - actual) ^ 2 ) %>% sum()
-
+```{r}
+calc_KNN_error(k = 10,
+               indices = indices,
+               train = train.response,
+               test = test) 
 ```
 
 
