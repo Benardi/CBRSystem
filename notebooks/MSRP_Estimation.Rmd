@@ -42,6 +42,26 @@ theme_set(theme_bw())
 
 <br>
 
+Data has the following attributes:
+
+- `Make`: Make of the car;
+- `Model`: Model of the car;
+- `Year`: Manufacturing Date;
+- `Engine.Fuel.Type`: Kind of fuel the engine runs on;
+- `Engine.HP`: Engine HorsePower;
+- `Engine.Cylinders`: Number of cylinders in the engine;
+- `Transmission.Type`: Type of car transmission;
+- `Driven_Wheels`: Wheels added;
+- `Number.of.Doors`: Number of doors;
+- `Vehicle.Size`: Vehycle size;
+- `Vehicle.Style`: Vehycle style;
+- `highway.MPG`: Miles per gallon on road;
+- `city.mpg`: Miles per gallon on city;
+- `Popularity`: Car popularity;
+- `MSRP`: Manufacturer's Suggested Retail Price and target variable.
+
+<br>
+
 #### Loading Data
 
 ```{r}
@@ -67,9 +87,6 @@ read_csv(here::here("data/data.csv"),
             MSRP = col_integer()
             )) %>% 
   drop_na() -> car_data 
-
-car_data %>% 
-    glimpse()
 ```
 
 ## Dummify Categorical Variables 
@@ -145,7 +162,7 @@ dplyr::anti_join(car_data,
                  by = 'id') -> test
 ```
 
-## Dissociate predictors from response variable/surrogate key
+## Dissociate predictors from target variable/surrogate key
 
 ```{r}
 train %>% 
