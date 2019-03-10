@@ -1,23 +1,41 @@
-# CBRSystem
+[![Build Status](https://img.shields.io/badge/R%3E%3D-3.3.3-6666ff.svg)](https://cran.r-project.org/doc/FAQ/R-FAQ.html)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Case Based Reasoning System to estimate the  manufacturer's suggested retail price (MSRP) of a car
+# Case based reasoning System
 
-## Employed packages
+Case based reasoning system to estimate the  manufacturer's suggested retail price (MSRP) of a car.
+
+# Data
+
+The *Car Features and MSRP* dataset is an open dataset that includes features such as make, model, year, and engine type to predict price, further information about it can be found at its [webpage](https://www.kaggle.com/CooperUnion/cardataset).
+
+
+
+## Prerequisites
 
 This project makes use of the respective packages:
 
-* FNN
-* here
+* `R >= 3.3.3`
 * magrittr
 * tidyverse
+* FNN
+* here
 
 ## Code
 
-Custom functions are available at the directory 'code'
+Custom functions are available at the directory `code/`
 
-## Notebooks
+## Execution
 
-Notebooks  are available at the directory 'notebooks'
+The R notebooks reside in the `notebooks/` directory, and ideally should be run under the Rstudio IDE.
+
+## Authors
+
+* **Benardi Nunes** - *Initial work* - [Benardi](https://github.com/Benardi)
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
 
 ## Further information
 
